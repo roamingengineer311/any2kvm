@@ -86,6 +86,11 @@ struct SESparseVolatileHeader
 
 char zeroes[512*8] __attribute__((aligned(4096)));
 
+static int supported_reserved1(uint64_t reserved1)
+{
+      return reserved1 == 0 || reserved1 == 0x200;
+}
+
 int main(int argc, char *argv[])
 {
 	if( argc != 3 )
@@ -127,7 +132,7 @@ int main(int argc, char *argv[])
 	if( hdr->grain_size != 8 ||
 		hdr->grain_table_size != 64 ||
 		hdr->flags != 0 ||
-		hdr->reserved1 != 0 || hdr->reserved2 != 0 || hdr->reserved3 != 0 || hdr->reserved4 != 0 ||
+		!supported_reserved1(hdr->reserved1) || hdr->reserved2 != 0 || hdr->reserved3 != 0 || hdr->reserved4 != 0 ||
 		hdr->volatile_header_offset != 1 ||
 		hdr->volatile_header_size != 1 ||
 		hdr->journal_header_offset != 2 ||
@@ -136,7 +141,7 @@ int main(int argc, char *argv[])
 		hdr->journal_size != 2048 ||
 		hdr->grain_dir_offset != 4096 )
 	{
-		fprintf(stderr, "unsupported values in hdr\n");
+		fprintf(stderr, "unsupported values in hdr: reserved1=0x%lx\n", hdr->reserved1);
 		exit(1);
 	}
 	
